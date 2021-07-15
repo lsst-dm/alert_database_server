@@ -1,51 +1,10 @@
-import abc
-import os.path
+from fastapi import FastAPI, HTTPException, Response
 
-import google.cloud.storage as gcs
-from fastapi import FastAPI, HTTPException
+from alertdb.storage import AlertDatabaseBackend, NotFoundError
 
 
-class AlertDatabaseBackend(abc.ABC):
-    @abc.abstractmethod
-    def get_alert(self, alert_id: str) -> bytes:
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def get_schema(self, schema_id: str) -> bytes:
-        raise NotImplementedError()
-
-
-class FileBackend(AlertDatabaseBackend):
-    def __init__(self, root_dir: str):
-        self.root_dir = root_dir
-
-    def get_alert(self, alert_id: str) -> bytes:
-        try:
-            with open(os.path.join(self.root_dir, "alerts", alert_id)) as f:
-                return f.read()
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="alert not found")
-
-    def get_schema(self, schema_id: str) -> bytes:
-        try:
-            with open(os.path.join(self.root_dir, "schemas", schema_id)) as f:
-                return f.read()
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="alert not found")
-
-
-class GoogleObjectStorageBackend(AlertDatabaseBackend):
-    def __init__(self, gcp_project: str, bucket_name: str):
-        self.object_store_client = gcs.Client(project=gcp_project)
-        self.bucket = self.object_store_client.bucket(bucket_name)
-
-    def get_alert(self, alert_id: str) -> bytes:
-        blob = self.bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
-        return blob.download_as_bytes()
-
-    def get_schema(self, schema_id: str) -> bytes:
-        blob = self.bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")
-        return blob.download_as_bytes()
+SCHEMA_CONTENT_TYPE = "application/vnd.schemaregistry.v1+json"
+ALERT_CONTENT_TYPE = "application/octet-stream"
 
 
 def create_server(backend: AlertDatabaseBackend):
@@ -53,10 +12,20 @@ def create_server(backend: AlertDatabaseBackend):
 
     @app.get("/v1/schemas/{schema_id}")
     def get_schema(schema_id: str):
-        return backend.get_schema(schema_id)
+        try:
+            schema_bytes = backend.get_schema(schema_id)
+        except NotFoundError as nfe:
+            raise HTTPException(status_code=404, detail="schema not found") from nfe
+
+        return Response(content=schema_bytes, media_type=SCHEMA_CONTENT_TYPE)
 
     @app.get("/v1/alerts/{alert_id}")
     def get_alert(alert_id: str):
-        return backend.get_alert(alert_id)
+        try:
+            alert_bytes = backend.get_alert(alert_id)
+        except NotFoundError as nfe:
+            raise HTTPException(status_code=404, detail="alert not found") from nfe
+
+        return Response(content=alert_bytes, media_type=ALERT_CONTENT_TYPE)
 
     return app
