@@ -102,14 +102,34 @@ class ServerIntegrationTest(unittest.TestCase):
 
     def test_get_existing_alerts(self):
         for alert_id, alert in self.stored_alerts.items():
-            have = self._get_alert(alert_id)
-            assert have.content == alert
+            response = self._get_alert(alert_id)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, alert)
 
-    def _get_alert(self, alert_id: str):
+    def test_get_existing_schemas(self):
+        for schema_id, schema in self.stored_schemas.items():
+            response = self._get_schema(schema_id)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, schema)
+
+    def test_get_missing_alert(self):
+        response = self._get_alert("bogus")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_missing_schema(self):
+        response = self._get_schema("bogus")
+        self.assertEqual(response.status_code, 404)
+
+    def _get_alert(self, alert_id: str) -> requests.Response:
         host = self.server_host
         port = self.server_port
         url = f"http://{host}:{port}/v1/alerts/{alert_id}"
         logger.info("fetching %s", url)
-        response = requests.get(url)
-        response.raise_for_status()
-        return response
+        return requests.get(url)
+
+    def _get_schema(self, schema_id: str) -> requests.Response:
+        host = self.server_host
+        port = self.server_port
+        url = f"http://{host}:{port}/v1/schemas/{schema_id}"
+        logger.info("fetching %s", url)
+        return requests.get(url)

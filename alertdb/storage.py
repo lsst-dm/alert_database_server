@@ -1,6 +1,7 @@
 import abc
 import os.path
 
+import google.api_core.exceptions
 import google.cloud.storage as gcs
 
 
@@ -39,12 +40,18 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
         self.bucket = self.object_store_client.bucket(bucket_name)
 
     def get_alert(self, alert_id: str) -> bytes:
-        blob = self.bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
-        return blob.download_as_bytes()
+        try:
+            blob = self.bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
+            return blob.download_as_bytes()
+        except google.api_core.exceptions.NotFound as not_found:
+            raise NotFoundError("alert not found") from not_found
 
     def get_schema(self, schema_id: str) -> bytes:
-        blob = self.bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")
-        return blob.download_as_bytes()
+        try:
+            blob = self.bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")
+            return blob.download_as_bytes()
+        except google.api_core.exceptions.NotFound as not_found:
+            raise NotFoundError("alert not found") from not_found
 
 
 class NotFoundError(Exception):
