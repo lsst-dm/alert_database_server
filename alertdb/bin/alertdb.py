@@ -1,7 +1,8 @@
 import uvicorn
 import argparse
 
-from alertdb.server import create_server, FileBackend, GoogleObjectStorageBackend
+from alertdb.server import create_server
+from alertdb.storage import FileBackend, GoogleObjectStorageBackend
 
 
 def main():
@@ -45,7 +46,7 @@ def main():
         backend = GoogleObjectStorageBackend(args.gcp_project, args.gcp_bucket)
     else:
         # Shouldn't be possible if argparse is using the choices parameter as expected...
-        raise AsertionError("only valid --backend choices are local-files and google-cloud")
+        raise AssertionError("only valid --backend choices are local-files and google-cloud")
 
     server = create_server(backend)
     uvicorn.run(server, host=args.listen_host, port=args.listen_port, log_level="info")
