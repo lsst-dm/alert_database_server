@@ -6,7 +6,10 @@ from alertdb.storage import FileBackend, GoogleObjectStorageBackend
 
 
 def main():
-    parser = argparse.ArgumentParser("alertdb")
+    parser = argparse.ArgumentParser(
+        "alertdb", formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Run an alert database HTTP server."
+    )
     parser.add_argument(
         "--listen-host", type=str, default="127.0.0.1",
         help="host address to listen on for requests",
