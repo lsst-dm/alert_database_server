@@ -80,22 +80,26 @@ class ServerIntegrationTest(unittest.TestCase):
         self.client = TestClient(self.server)
 
     def test_get_existing_alerts(self):
+        """Test that retrieving an alert over HTTP works as expected."""
         for alert_id, alert in self.stored_alerts.items():
             response = self._get_alert(alert_id)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, alert)
 
     def test_get_existing_schemas(self):
+        """Test that retrieving a schema over HTTP works as expected."""
         for schema_id, schema in self.stored_schemas.items():
             response = self._get_schema(schema_id)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, schema)
 
     def test_get_missing_alert(self):
+        """Test that retrieving an alert that does not exist gives a 404."""
         response = self._get_alert("bogus")
         self.assertEqual(response.status_code, 404)
 
     def test_get_missing_schema(self):
+        """Test that retrieving a schema that does not exist gives a 404."""
         response = self._get_schema("bogus")
         self.assertEqual(response.status_code, 404)
 
