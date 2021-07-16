@@ -1,12 +1,9 @@
 import os
-import sys
 import unittest
 import google.cloud.storage as gcs
-import multiprocessing
-import time
-import uvicorn
 import requests
 import logging
+from fastapi.testclient import TestClient
 
 
 from alertdb.server import create_server
@@ -80,25 +77,7 @@ class ServerIntegrationTest(unittest.TestCase):
         """
         backend = GoogleObjectStorageBackend(self.gcp_project, self.bucket_name)
         self.server = create_server(backend)
-        self.server_host = "127.0.0.1"
-        self.server_port = 14541
-        self.server_process = multiprocessing.Process(
-            target=uvicorn.run,
-            args=(self.server, ),
-            kwargs={
-                "host": self.server_host,
-                "port": self.server_port,
-            },
-            daemon=True,
-        )
-        logger.info("launching server process")
-        self.server_process.start()
-        logger.info("server process pid: %s", self.server_process.pid)
-        time.sleep(0.5)  # Time for the server to start up
-
-    def tearDown(self):
-        logger.info("terminating server")
-        self.server_process.terminate()
+        self.client = TestClient(self.server)
 
     def test_get_existing_alerts(self):
         for alert_id, alert in self.stored_alerts.items():
@@ -121,15 +100,7 @@ class ServerIntegrationTest(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def _get_alert(self, alert_id: str) -> requests.Response:
-        host = self.server_host
-        port = self.server_port
-        url = f"http://{host}:{port}/v1/alerts/{alert_id}"
-        logger.info("fetching %s", url)
-        return requests.get(url)
+        return self.client.get(f"/v1/alerts/{alert_id}")
 
     def _get_schema(self, schema_id: str) -> requests.Response:
-        host = self.server_host
-        port = self.server_port
-        url = f"http://{host}:{port}/v1/schemas/{schema_id}"
-        logger.info("fetching %s", url)
-        return requests.get(url)
+        return self.client.get(f"/v1/schemas/{schema_id}")
