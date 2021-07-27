@@ -82,9 +82,18 @@ class AlertDatabaseBackend(abc.ABC):
         >>> import gzip
         >>> import struct
         >>> import io
+        >>> import json
+        >>> import fastavro
+        >>>
+        >>> # Get an alert from the backend, and extract its schema ID
         >>> alert_payload = backend.get_alert("alert-id")
-        >>> alert_payload = gzip.decompress(alert_payload)
-        >>> alert_
+        >>> wire_format_payload = io.BytesIO(gzip.decompress(alert_payload))
+        >>> magic_byte = wire_format_payload.read(1)
+        >>> schema_id = struct.unpack(">I", wire_format_payload.read(4))
+        >>>
+        >>> # Download and use the schema
+        >>> schema_bytes = backend.get_schema(schema_id)
+        >>> schema = fastavro.parse(json.loads(schema_bytes))
         """
         raise NotImplementedError()
 
