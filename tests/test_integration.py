@@ -18,7 +18,8 @@ class ServerIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """
-        Create a test bucket, and populate it with three alerts and three schemas.
+        Create a test bucket, and populate it with three alerts and three
+        schemas.
 
         The alerts and schemas don't have valid payloads.
         """
@@ -36,7 +37,7 @@ class ServerIntegrationTest(unittest.TestCase):
             bucket.delete()
         cls.addClassCleanup(delete_bucket)
 
-        # Populate the test bucket with a few objects in the expected locations.
+        # Populate the test bucket with a few objects in the expected locations
         def delete_blob(blob):
             # Callback to delete a blob during cleanup.
             logger.info("deleting blob %s", blob.name)
