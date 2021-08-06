@@ -46,7 +46,22 @@ optional arguments:
                         Google Cloud Storage bucket (default: None)
 ```
 
-## Running tests ##
+## Development Setup
+
+Clone as above, and then install with dev dependencies:
+
+```
+pip install --editable '.[dev]'
+```
+
+### Running lint and mypy ###
+Use good ol' make - this will run flake8, mypy, and unit tests:
+
+```
+make precommit
+```
+
+### Running tests ##
 
 The only test is an integration test against the Interim Data Facility on Google
 Cloud.
@@ -59,7 +74,7 @@ environment variable, and run the tests:
 
 ```
 % export ALERTDB_TEST_GCP_PROJECT=alert-stream
-% pytest .
+% make integration-test
 ============================= test session starts ==============================
 platform linux -- Python 3.8.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
 rootdir: /home/swnelson/code/rubin/alert_database_server

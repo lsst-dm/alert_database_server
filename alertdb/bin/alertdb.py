@@ -48,7 +48,8 @@ def main():
             parser.error("--backend=google-cloud requires --gcp-bucket be set")
         backend = GoogleObjectStorageBackend(args.gcp_project, args.gcp_bucket)
     else:
-        # Shouldn't be possible if argparse is using the choices parameter as expected...
+        # Shouldn't be possible if argparse is using the choices parameter as
+        # expected...
         raise AssertionError("only valid --backend choices are local-files and google-cloud")
 
     server = create_server(backend)

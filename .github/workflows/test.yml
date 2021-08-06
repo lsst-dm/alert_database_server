@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install
+        run: pip install -r <(curl https://raw.githubusercontent.com/lsst/linting/master/requirements.txt)
+
+      - name: Run linter
+        run: flake8 --ignore=E133,E226,E228 --max-line-length=110 --max-doc-length=79 --exclude bin,doc,**/*/__init.py,**/*/version.py,tests/.tests
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Pytest
+        run: pip install pytest
+
+      - name: Install package
+        run: pip install .
+
+      - name: Run unit tests
+        run: pytest
+
+      - name: Set up cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Run integration tests
+        run: pytest
+        env:
+          ALERTDB_TEST_GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
