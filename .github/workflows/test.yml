@@ -19,7 +19,7 @@ jobs:
         run: pip install .[dev]
 
       - name: Run commit-blocking lint checks
-        run: pre-commit --all-files
+        run: pre-commit run --all-files
 
   test:
     runs-on: ubuntu-latest
