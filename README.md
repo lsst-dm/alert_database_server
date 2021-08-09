@@ -11,6 +11,7 @@ Clone, and install with `pip` (in a virtual environment, if you like):
 ```
 git clone github.com/lsst-dm/alert_database_server
 cd alert_database_server
+pip install -r requirements.txt
 pip install .
 ```
 
@@ -48,15 +49,23 @@ optional arguments:
 
 ## Development Setup
 
-Clone as above, and then install with dev dependencies:
+Clone as above, and then make a virtual environment and use
+[pip-tools](https://github.com/jazzband/pip-tools) to synchronize your
+environment. This is a one-time setup:
 
 ```
-pip install --editable '.[dev]'
-```
+# Optional, but recommended: use a virtualenv
+python3 -m virtualenv virtualenv
+source virtualenv/bin/activate
 
-Then install the precommit hooks:
+# Install dependencies
+pip install pip-tools
+pip-sync requirements.txt dev-requirements.txt
 
-```
+# Install package
+pip install --editable .
+
+# Install precommit hooks
 pre-commit install
 ```
 
