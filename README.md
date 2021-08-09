@@ -61,10 +61,17 @@ pre-commit install
 ```
 
 ### Running lint and mypy ###
-Use good ol' make - this will run flake8, mypy, and unit tests:
+Linters and mypy checks should run automatically when you go to commit. To run
+them on-demand, you can use:
 
 ```
-make precommit
+pre-commit run
+```
+
+That will only run on the files that you changed; to run on all files, use
+
+```
+pre-commit run --all-files
 ```
 
 ### Running tests ##
@@ -80,7 +87,7 @@ environment variable, and run the tests:
 
 ```
 % export ALERTDB_TEST_GCP_PROJECT=alert-stream
-% make integration-test
+% pytest
 ============================= test session starts ==============================
 platform linux -- Python 3.8.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
 rootdir: /home/swnelson/code/rubin/alert_database_server
