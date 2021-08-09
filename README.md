@@ -54,6 +54,12 @@ Clone as above, and then install with dev dependencies:
 pip install --editable '.[dev]'
 ```
 
+Then install the precommit hooks:
+
+```
+pre-commit install
+```
+
 ### Running lint and mypy ###
 Use good ol' make - this will run flake8, mypy, and unit tests:
 
