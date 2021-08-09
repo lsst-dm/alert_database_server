@@ -31,3 +31,21 @@ repos:
   - id: mypy
     additional_dependencies:
       - types-requests
+
+- repo: https://github.com/jazzband/pip-tools
+  rev: 6.2.0
+  hooks:
+  - id: pip-compile
+    name: pip-compile dev-requirements.in
+    files: ^dev-requirements\.(in|txt)$
+    args:
+      - --allow-unsafe
+      - --generate-hashes
+      - dev-requirements.in
+  - id: pip-compile
+    name: pip-compile requirements.in
+    files: ^requirements\.(in|txt)$
+    args:
+      - --allow-unsafe
+      - --generate-hashes
+      - requirements.in

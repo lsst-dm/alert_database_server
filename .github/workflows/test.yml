@@ -15,7 +15,10 @@ jobs:
           python-version: 3.8
 
       - name: Install package
-        run: pip install .[dev]
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run commit-blocking lint checks
         run: pre-commit run --all-files
@@ -30,11 +33,11 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Pytest
-        run: pip install pytest
-
       - name: Install package
-        run: pip install .
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run unit tests
         run: pytest
@@ -50,18 +53,18 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Pytest
-        run: pip install pytest
-
-      - name: Install package
-        run: pip install .
-
       - name: Set up cloud SDK
         uses: google-github-actions/setup-gcloud@master
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+
+      - name: Install package
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run integration tests
         run: pytest
