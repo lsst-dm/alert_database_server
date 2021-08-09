@@ -1,5 +1,6 @@
-import uvicorn
 import argparse
+
+import uvicorn
 
 from alertdb.server import create_server
 from alertdb.storage import FileBackend, GoogleObjectStorageBackend
@@ -7,31 +8,45 @@ from alertdb.storage import FileBackend, GoogleObjectStorageBackend
 
 def main():
     parser = argparse.ArgumentParser(
-        "alertdb", formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Run an alert database HTTP server."
+        "alertdb",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Run an alert database HTTP server.",
     )
     parser.add_argument(
-        "--listen-host", type=str, default="127.0.0.1",
+        "--listen-host",
+        type=str,
+        default="127.0.0.1",
         help="host address to listen on for requests",
     )
     parser.add_argument(
-        "--listen-port", type=int, default=5000,
+        "--listen-port",
+        type=int,
+        default=5000,
         help="host port to listen on for requests",
     )
     parser.add_argument(
-        "--backend", type=str, choices=("local-files", "google-cloud"), default="local-files",
+        "--backend",
+        type=str,
+        choices=("local-files", "google-cloud"),
+        default="local-files",
         help="backend to use to source alerts",
     )
     parser.add_argument(
-        "--local-file-root", type=str, default=None,
+        "--local-file-root",
+        type=str,
+        default=None,
         help="when using the local-files backend, the root directory where alerts should be found",
     )
     parser.add_argument(
-        "--gcp-project", type=str, default=None,
+        "--gcp-project",
+        type=str,
+        default=None,
         help="when using the google-cloud backend, the name of the GCP project",
     )
     parser.add_argument(
-        "--gcp-bucket", type=str, default=None,
+        "--gcp-bucket",
+        type=str,
+        default=None,
         help="when using the google-cloud backend, the name of the Google Cloud Storage bucket",
     )
     args = parser.parse_args()
@@ -50,7 +65,9 @@ def main():
     else:
         # Shouldn't be possible if argparse is using the choices parameter as
         # expected...
-        raise AssertionError("only valid --backend choices are local-files and google-cloud")
+        raise AssertionError(
+            "only valid --backend choices are local-files and google-cloud"
+        )
 
     server = create_server(backend)
     uvicorn.run(server, host=args.listen_host, port=args.listen_port, log_level="info")

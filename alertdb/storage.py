@@ -109,6 +109,7 @@ class FileBackend(AlertDatabaseBackend):
     This is provided as an example, to ensure that it's clear how to implement
     an AlertDatabaseBackend subclass.
     """
+
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
 
@@ -133,6 +134,7 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
 
     The path for alert and schema objects follows the scheme in DMTN-183.
     """
+
     def __init__(self, gcp_project: str, bucket_name: str):
         self.object_store_client = gcs.Client(project=gcp_project)
         self.bucket = self.object_store_client.bucket(bucket_name)

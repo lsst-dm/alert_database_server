@@ -1,14 +1,13 @@
+import logging
 import os
 import unittest
+
 import google.cloud.storage as gcs
 import requests
-import logging
 from fastapi.testclient import TestClient
-
 
 from alertdb.server import create_server
 from alertdb.storage import GoogleObjectStorageBackend
-
 
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
@@ -25,7 +24,9 @@ class ServerIntegrationTest(unittest.TestCase):
         """
         gcp_project = os.environ.get("ALERTDB_TEST_GCP_PROJECT", None)
         if gcp_project is None:
-            raise unittest.SkipTest("the $ALERTDB_TEST_GCP_PROJECT environment variable must be set")
+            raise unittest.SkipTest(
+                "the $ALERTDB_TEST_GCP_PROJECT environment variable must be set"
+            )
         bucket_name = "alertdb_server_integration_test_bucket"
         client = gcs.Client(project=gcp_project)
 
@@ -35,6 +36,7 @@ class ServerIntegrationTest(unittest.TestCase):
         def delete_bucket():
             logger.info("deleting bucket %s", bucket_name)
             bucket.delete()
+
         cls.addClassCleanup(delete_bucket)
 
         # Populate the test bucket with a few objects in the expected locations
@@ -46,7 +48,7 @@ class ServerIntegrationTest(unittest.TestCase):
         alerts = {
             "alert-id-1": b"payload-1",
             "alert-id-2": b"payload-2",
-            "alert-id-3": b"payload-3"
+            "alert-id-3": b"payload-3",
         }
         for alert_id, alert_payload in alerts.items():
             blob = bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
@@ -58,7 +60,7 @@ class ServerIntegrationTest(unittest.TestCase):
         schemas = {
             "1": b"schema-payload-1",
             "2": b"schema-payload-2",
-            "3": b"schema-payload-3"
+            "3": b"schema-payload-3",
         }
         for schema_id, schema_payload in schemas.items():
             blob = bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")

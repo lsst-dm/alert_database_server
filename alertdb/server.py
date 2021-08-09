@@ -4,7 +4,6 @@ from fastapi import FastAPI, HTTPException, Response
 
 from alertdb.storage import AlertDatabaseBackend, NotFoundError
 
-
 # This Content-Type is described as the "preferred content type" for a
 # Confluent Schema Registry here:
 # https://docs.confluent.io/platform/current/schema-registry/develop/api.html#content-types
