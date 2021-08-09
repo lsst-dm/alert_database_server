@@ -46,7 +46,35 @@ optional arguments:
                         Google Cloud Storage bucket (default: None)
 ```
 
-## Running tests ##
+## Development Setup
+
+Clone as above, and then install with dev dependencies:
+
+```
+pip install --editable '.[dev]'
+```
+
+Then install the precommit hooks:
+
+```
+pre-commit install
+```
+
+### Running lint and mypy ###
+Linters and mypy checks should run automatically when you go to commit. To run
+them on-demand, you can use:
+
+```
+pre-commit run
+```
+
+That will only run on the files that you changed; to run on all files, use
+
+```
+pre-commit run --all-files
+```
+
+### Running tests ##
 
 The only test is an integration test against the Interim Data Facility on Google
 Cloud.
@@ -59,7 +87,7 @@ environment variable, and run the tests:
 
 ```
 % export ALERTDB_TEST_GCP_PROJECT=alert-stream
-% pytest .
+% pytest
 ============================= test session starts ==============================
 platform linux -- Python 3.8.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
 rootdir: /home/swnelson/code/rubin/alert_database_server

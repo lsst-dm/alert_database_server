@@ -4,12 +4,12 @@ from fastapi import FastAPI, HTTPException, Response
 
 from alertdb.storage import AlertDatabaseBackend, NotFoundError
 
-
-# This Content-Type is described as the "preferred content type" for a Confluent
-# Schema Registry here:
+# This Content-Type is described as the "preferred content type" for a
+# Confluent Schema Registry here:
 # https://docs.confluent.io/platform/current/schema-registry/develop/api.html#content-types
-# We're not running a Confluent Schema Registry, and don't conform to the API of
-# one, but we do serve schemas, so this seems possibly appropriate.
+# We're not running a Confluent Schema Registry, and don't conform to the API
+# of one, but we do serve schemas, so this seems possibly appropriate.
+
 SCHEMA_CONTENT_TYPE = "application/vnd.schemaregistry.v1+json"
 
 # There's no consensus on an Avro content type. application/avro+binary is
@@ -33,13 +33,14 @@ def create_server(backend: AlertDatabaseBackend) -> FastAPI:
 
     Returns
     -------
-    FastAPI : A FastAPI application which routes HTTP requests to return schemas.
+    FastAPI : A FastAPI application which routes HTTP requests to return
+    schemas.
     """
 
-    # FastAPI documentation suggests that the application be a global singleton,
-    # with handlers defined as top-level functions, but this doesn't seem to
-    # permit any way of passing in a persistent backend. So, this little
-    # create_server closure exists to allow dependency injection.
+    # FastAPI documentation suggests that the application be a global
+    # singleton, with handlers defined as top-level functions, but this doesn't
+    # seem to permit any way of passing in a persistent backend. So, this
+    # little create_server closure exists to allow dependency injection.
 
     app = FastAPI()
 

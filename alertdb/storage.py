@@ -11,7 +11,8 @@ import google.cloud.storage as gcs
 
 class AlertDatabaseBackend(abc.ABC):
     """
-    An abstract interface representing a storage backend for alerts and schemas.
+    An abstract interface representing a storage backend for alerts and
+    schemas.
     """
 
     @abc.abstractmethod
@@ -22,7 +23,8 @@ class AlertDatabaseBackend(abc.ABC):
         Confluent Wire Format is described here:
           https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#wire-format
 
-        To summarize, it is a 5-byte header, followed by binary-encoded Avro data.
+        To summarize, it is a 5-byte header, followed by binary-encoded Avro
+        data.
 
         The first header byte is magic byte, with a value of 0.
         The next 4 bytes are a 4-byte schema ID, which is an unsigned 32-bit
@@ -60,7 +62,9 @@ class AlertDatabaseBackend(abc.ABC):
 
     @abc.abstractmethod
     def get_schema(self, schema_id: str) -> bytes:
-        """Retrieve a single alert schema JSON document in its JSON-serialized form.
+        """
+        Retrieve a single alert schema JSON document in its JSON-serialized
+        form.
 
         Parameters
         ----------
@@ -105,6 +109,7 @@ class FileBackend(AlertDatabaseBackend):
     This is provided as an example, to ensure that it's clear how to implement
     an AlertDatabaseBackend subclass.
     """
+
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
 
@@ -129,6 +134,7 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
 
     The path for alert and schema objects follows the scheme in DMTN-183.
     """
+
     def __init__(self, gcp_project: str, bucket_name: str):
         self.object_store_client = gcs.Client(project=gcp_project)
         self.bucket = self.object_store_client.bucket(bucket_name)
@@ -149,4 +155,6 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
 
 
 class NotFoundError(Exception):
-    """Error which represents a failure to find an alert or schema in a backend."""
+    """
+    Error which represents a failure to find an alert or schema in a backend.
+    """
