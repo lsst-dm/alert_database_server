@@ -106,6 +106,11 @@ class ServerIntegrationTest(unittest.TestCase):
         response = self._get_schema("bogus")
         self.assertEqual(response.status_code, 404)
 
+    def test_healthcheck(self):
+        """Test that the healthcheck endpoint returns 200."""
+        response = self.client.get("/v1/health")
+        self.assertEqual(response.status_code, 200)
+
     def _get_alert(self, alert_id: str) -> requests.Response:
         return self.client.get(f"/v1/alerts/{alert_id}")
 

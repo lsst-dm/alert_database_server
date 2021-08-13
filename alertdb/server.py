@@ -44,6 +44,10 @@ def create_server(backend: AlertDatabaseBackend) -> FastAPI:
 
     app = FastAPI()
 
+    @app.get("/v1/health")
+    def healthcheck():
+        return Response(content=b"OK")
+
     @app.get("/v1/schemas/{schema_id}")
     def get_schema(schema_id: str):
         try:
