@@ -15,10 +15,24 @@ jobs:
           python-version: 3.8
 
       - name: Install package
-        run: pip install .[dev]
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run commit-blocking lint checks
-        run: pre-commit run --all-files
+        run: |
+          # Run pre-commit hooks. We have to be a little careful here with
+          # pip-compile: if we ran it with --all-files, it would run
+          # pip-compile on every pull, which would update the pinned
+          # dependencies if any have changed - even if the requirements.in
+          # files are unchanged.
+          #
+          # Run everything except pip-compile against all files
+          SKIP=pip-compile pre-commit run --all-files
+          # Run pip-compile - but only if requirements.in or
+          # dev-requirements.in have changed in this pull request's diff.
+          pre-commit run pip-compile --from-ref=$GITHUB_BASE_REF --to-ref=$GITHUB_HEAD_REF
 
   unit-test:
     runs-on: ubuntu-latest
@@ -30,11 +44,11 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Pytest
-        run: pip install pytest
-
       - name: Install package
-        run: pip install .
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run unit tests
         run: pytest
@@ -50,18 +64,18 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Pytest
-        run: pip install pytest
-
-      - name: Install package
-        run: pip install .
-
       - name: Set up cloud SDK
         uses: google-github-actions/setup-gcloud@master
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+
+      - name: Install package
+        run: |
+          pip install pip-tools>=6.2.0
+          pip-sync requirements.txt dev-requirements.txt
+          pip install .
 
       - name: Run integration tests
         run: pytest
