@@ -44,10 +44,16 @@ def main():
         help="when using the google-cloud backend, the name of the GCP project",
     )
     parser.add_argument(
-        "--gcp-bucket",
+        "--gcp-bucket-alerts",
         type=str,
-        default=None,
-        help="when using the google-cloud backend, the name of the Google Cloud Storage bucket",
+        default="alert-packets",
+        help="when using the google-cloud backend, the name of the GCS bucket for alert packets",
+    )
+    parser.add_argument(
+        "--gcp-bucket-schemas",
+        type=str,
+        default="alert-schemas",
+        help="when using the google-cloud backend, the name of the GCS bucket for alert schemas",
     )
     args = parser.parse_args()
 
@@ -59,9 +65,13 @@ def main():
     elif args.backend == "google-cloud":
         if args.gcp_project is None:
             parser.error("--backend=google-cloud requires --gcp-project be set")
-        if args.gcp_bucket is None:
-            parser.error("--backend=google-cloud requires --gcp-bucket be set")
-        backend = GoogleObjectStorageBackend(args.gcp_project, args.gcp_bucket)
+        if args.gcp_bucket_alerts is None or args.gcp_bucket_schemas is None:
+            parser.error(
+                "--backend=google-cloud requires --gcp-bucket-alerts and --gcp-bucket-schemas be set"
+            )
+        backend = GoogleObjectStorageBackend(
+            args.gcp_project, args.gcp_bucket_alerts, args.gcp_bucket_schemas
+        )
     else:
         # Shouldn't be possible if argparse is using the choices parameter as
         # expected...
