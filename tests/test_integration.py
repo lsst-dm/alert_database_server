@@ -27,17 +27,27 @@ class ServerIntegrationTest(unittest.TestCase):
             raise unittest.SkipTest(
                 "the $ALERTDB_TEST_GCP_PROJECT environment variable must be set"
             )
-        bucket_name = "alertdb_server_integration_test_bucket"
+        packet_bucket_name = "alertdb_server_integration_test_bucket_packets"
+        schema_bucket_name = "alertdb_server_integration_test_bucket_schemas"
         client = gcs.Client(project=gcp_project)
 
-        logger.info("creating bucket %s", bucket_name)
-        bucket = client.create_bucket(bucket_name)
+        logger.info("creating bucket %s", packet_bucket_name)
+        packet_bucket = client.create_bucket(packet_bucket_name)
 
-        def delete_bucket():
-            logger.info("deleting bucket %s", bucket_name)
-            bucket.delete()
+        def delete_packet_bucket():
+            logger.info("deleting bucket %s", packet_bucket_name)
+            packet_bucket.delete()
 
-        cls.addClassCleanup(delete_bucket)
+        cls.addClassCleanup(delete_packet_bucket)
+
+        logger.info("creating bucket %s", schema_bucket_name)
+        schema_bucket = client.create_bucket(schema_bucket_name)
+
+        def delete_schema_bucket():
+            logger.info("deleting bucket %s", schema_bucket_name)
+            schema_bucket.delete()
+
+        cls.addClassCleanup(delete_schema_bucket)
 
         # Populate the test bucket with a few objects in the expected locations
         def delete_blob(blob):
@@ -51,7 +61,7 @@ class ServerIntegrationTest(unittest.TestCase):
             "alert-id-3": b"payload-3",
         }
         for alert_id, alert_payload in alerts.items():
-            blob = bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
+            blob = packet_bucket.blob(f"/alert_archive/v1/alerts/{alert_id}.avro.gz")
             logger.info("uploading blob %s", blob.name)
             # N.B. this method is poorly named; it accepts bytes:
             blob.upload_from_string(alert_payload)
@@ -63,14 +73,15 @@ class ServerIntegrationTest(unittest.TestCase):
             "3": b"schema-payload-3",
         }
         for schema_id, schema_payload in schemas.items():
-            blob = bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")
+            blob = schema_bucket.blob(f"/alert_archive/v1/schemas/{schema_id}.json")
             logger.info("uploading blob %s", blob.name)
             # N.B. this method is poorly named; it accepts bytes:
             blob.upload_from_string(schema_payload)
             cls.addClassCleanup(delete_blob, blob)
 
         cls.gcp_project = gcp_project
-        cls.bucket_name = bucket_name
+        cls.packet_bucket_name = packet_bucket_name
+        cls.schema_bucket_name = schema_bucket_name
         cls.stored_alerts = alerts
         cls.stored_schemas = schemas
 
@@ -78,7 +89,9 @@ class ServerIntegrationTest(unittest.TestCase):
         """
         Run a local instance of the server.
         """
-        backend = GoogleObjectStorageBackend(self.gcp_project, self.bucket_name)
+        backend = GoogleObjectStorageBackend(
+            self.gcp_project, self.packet_bucket_name, self.schema_bucket_name
+        )
         self.server = create_server(backend)
         self.client = TestClient(self.server)
 
