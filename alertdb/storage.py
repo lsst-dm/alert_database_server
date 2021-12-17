@@ -3,10 +3,13 @@ Implementations of backend storage systems for the alert database server.
 """
 
 import abc
+import logging
 import os.path
 
 import google.api_core.exceptions
 import google.cloud.storage as gcs
+
+logger = logging.getLogger(__name__)
 
 
 class AlertDatabaseBackend(abc.ABC):
@@ -143,6 +146,7 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
         self.schema_bucket = self.object_store_client.bucket(schema_bucket_name)
 
     def get_alert(self, alert_id: str) -> bytes:
+        logger.info("retrieving alert id=%s", alert_id)
         try:
             blob = self.packet_bucket.blob(
                 f"/alert_archive/v1/alerts/{alert_id}.avro.gz"
@@ -152,6 +156,7 @@ class GoogleObjectStorageBackend(AlertDatabaseBackend):
             raise NotFoundError("alert not found") from not_found
 
     def get_schema(self, schema_id: str) -> bytes:
+        logger.info("retrieving schema id=%s", schema_id)
         try:
             blob = self.schema_bucket.blob(
                 f"/alert_archive/v1/schemas/{schema_id}.json"
