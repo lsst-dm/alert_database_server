@@ -6,6 +6,8 @@ import abc
 import logging
 import os.path
 
+import boto3
+import botocore
 import google.api_core.exceptions
 import google.cloud.storage as gcs
 
@@ -131,38 +133,37 @@ class FileBackend(AlertDatabaseBackend):
             raise NotFoundError("schema not found") from file_not_found
 
 
-class GoogleObjectStorageBackend(AlertDatabaseBackend):
-    """
-    Retrieves alerts and schemas from a Google Cloud Storage bucket.
-
-    The path for alert and schema objects follows the scheme in DMTN-183.
-    """
+class USDFObjectStorageBackend(AlertDatabaseBackend):
 
     def __init__(
-        self, gcp_project: str, packet_bucket_name: str, schema_bucket_name: str
+        self, endpoint_url: str, packet_bucket_name: str, schema_bucket_name: str
     ):
-        self.object_store_client = gcs.Client(project=gcp_project)
-        self.packet_bucket = self.object_store_client.bucket(packet_bucket_name)
-        self.schema_bucket = self.object_store_client.bucket(schema_bucket_name)
+        self.object_store_client = boto3.client(
+            "s3", endpoint_url=endpoint_url
+        )  # Default way of getting a boto3 client that an talk to s3
+        self.packet_bucket = packet_bucket_name
+        self.schema_bucket = schema_bucket_name
 
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
         try:
-            blob = self.packet_bucket.blob(
-                f"/alert_archive/v1/alerts/{alert_id}.avro.gz"
+            alert_key = f"/alert_archive/v1/alerts/{alert_id}.avro.gz"  # boto3 terminology for objects, objects live in prefixes inside of buckets
+            blob = self.object_store_client.get_object(
+                Bucket=self.packet_bucket, Key=alert_key
             )
-            return blob.download_as_bytes()
-        except google.api_core.exceptions.NotFound as not_found:
+            return blob["Body"].read()
+        except self.object_store_client.exceptions.NoSuchKey as not_found:
             raise NotFoundError("alert not found") from not_found
 
     def get_schema(self, schema_id: str) -> bytes:
         logger.info("retrieving schema id=%s", schema_id)
         try:
-            blob = self.schema_bucket.blob(
-                f"/alert_archive/v1/schemas/{schema_id}.json"
+            schema_key = f"/alert_archive/v1/schemas/{schema_id}.json"
+            blob = self.object_store_client.get_object(
+                Bucket=self.schema_bucket, Key=schema_key
             )
-            return blob.download_as_bytes()
-        except google.api_core.exceptions.NotFound as not_found:
+            return blob["Body"].read()
+        except self.object_store_client.exceptions.NoSuchKey as not_found:
             raise NotFoundError("alert not found") from not_found
 
 
