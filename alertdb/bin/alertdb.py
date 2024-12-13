@@ -4,7 +4,7 @@ import logging
 import uvicorn
 
 from alertdb.server import create_server
-from alertdb.storage import FileBackend, GoogleObjectStorageBackend
+from alertdb.storage import FileBackend, USDFObjectStorageBackend
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +50,13 @@ def main():
         "--gcp-bucket-alerts",
         type=str,
         default="alert-packets",
-        help="when using the google-cloud backend, the name of the GCS bucket for alert packets",
+        help="when using the google-cloud backend, the name of the boto3 bucket for alert packets",
     )
     parser.add_argument(
         "--gcp-bucket-schemas",
         type=str,
         default="alert-schemas",
-        help="when using the google-cloud backend, the name of the GCS bucket for alert schemas",
+        help="when using the google-cloud backend, the name of the boto3 bucket for alert schemas",
     )
     parser.add_argument("--verbose", action="store_true", help="log a bunch")
     parser.add_argument("--debug", action="store_true", help="log even more")
@@ -99,7 +99,7 @@ def main():
         logger.info("gcp_bucket_alerts: %s", args.gcp_bucket_alerts)
         logger.info("gcp_bucket_schemas: %s", args.gcp_bucket_schemas)
 
-        backend = GoogleObjectStorageBackend(
+        backend = USDFObjectStorageBackend(
             args.gcp_project, args.gcp_bucket_alerts, args.gcp_bucket_schemas
         )
 

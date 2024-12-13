@@ -7,9 +7,6 @@ import logging
 import os.path
 
 import boto3
-import botocore
-import google.api_core.exceptions
-import google.cloud.storage as gcs
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +144,9 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
         try:
-            alert_key = f"/alert_archive/v1/alerts/{alert_id}.avro.gz"  # boto3 terminology for objects, objects live in prefixes inside of buckets
+            alert_key = f"/alert_archive/v1/alerts/{alert_id}.avro.gz"
+            # boto3 terminology for objects, objects live in prefixes inside
+            # of buckets
             blob = self.object_store_client.get_object(
                 Bucket=self.packet_bucket, Key=alert_key
             )

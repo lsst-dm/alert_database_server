@@ -2,12 +2,12 @@ import logging
 import os
 import unittest
 
-import google.cloud.storage as gcs
+import boto3
 import requests
 from fastapi.testclient import TestClient
 
 from alertdb.server import create_server
-from alertdb.storage import GoogleObjectStorageBackend
+from alertdb.storage import USDFObjectStorageBackend
 
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
@@ -29,7 +29,7 @@ class ServerIntegrationTest(unittest.TestCase):
             )
         packet_bucket_name = "alertdb_server_integration_test_bucket_packets"
         schema_bucket_name = "alertdb_server_integration_test_bucket_schemas"
-        client = gcs.Client(project=gcp_project)
+        client = boto3.client("s3", endpoint_url=gcp_project)
 
         logger.info("creating bucket %s", packet_bucket_name)
         packet_bucket = client.create_bucket(packet_bucket_name)
@@ -89,7 +89,7 @@ class ServerIntegrationTest(unittest.TestCase):
         """
         Run a local instance of the server.
         """
-        backend = GoogleObjectStorageBackend(
+        backend = USDFObjectStorageBackend(
             self.gcp_project, self.packet_bucket_name, self.schema_bucket_name
         )
         self.server = create_server(backend)
