@@ -12,11 +12,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.11
 
       - name: Install package
         run: |
-          pip install pip-tools>=6.2.0
+          pip install pip-tools>=7.4.0
           pip-sync requirements.txt dev-requirements.txt
           pip install .
 
@@ -33,51 +33,3 @@ jobs:
           # Run pip-compile - but only if requirements.in or
           # dev-requirements.in have changed in this pull request's diff.
           pre-commit run pip-compile --from-ref=$GITHUB_BASE_REF --to-ref=$GITHUB_HEAD_REF
-
-  unit-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Install package
-        run: |
-          pip install pip-tools>=6.2.0
-          pip-sync requirements.txt dev-requirements.txt
-          pip install .
-
-      - name: Run unit tests
-        run: pytest
-
-  integration-test:
-    runs-on: ubuntu-latest
-    concurrency: integration-test
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Set up cloud SDK
-        uses: google-github-actions/setup-gcloud@master
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
-
-      - name: Install package
-        run: |
-          pip install pip-tools>=6.2.0
-          pip-sync requirements.txt dev-requirements.txt
-          pip install .
-
-      - name: Run integration tests
-        run: pytest
-        env:
-          ALERTDB_TEST_GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}

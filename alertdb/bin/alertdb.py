@@ -4,7 +4,7 @@ import logging
 import uvicorn
 
 from alertdb.server import create_server
-from alertdb.storage import FileBackend, GoogleObjectStorageBackend
+from alertdb.storage import FileBackend, USDFObjectStorageBackend
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "--backend",
         type=str,
-        choices=("local-files", "google-cloud"),
+        choices=("local-files", "s3-remote"),
         default="local-files",
         help="backend to use to source alerts",
     )
@@ -41,22 +41,22 @@ def main():
         help="when using the local-files backend, the root directory where alerts should be found",
     )
     parser.add_argument(
-        "--gcp-project",
+        "--endpoint-url",
         type=str,
         default=None,
-        help="when using the google-cloud backend, the name of the GCP project",
+        help="when using the s3-remote backend, the endpoint url of the project",
     )
     parser.add_argument(
-        "--gcp-bucket-alerts",
+        "--bucket-alerts",
         type=str,
         default="alert-packets",
-        help="when using the google-cloud backend, the name of the GCS bucket for alert packets",
+        help="when using the google-cloud backend, the name of the boto3 bucket for alert packets",
     )
     parser.add_argument(
-        "--gcp-bucket-schemas",
+        "--bucket-schemas",
         type=str,
         default="alert-schemas",
-        help="when using the google-cloud backend, the name of the GCS bucket for alert schemas",
+        help="when using the google-cloud backend, the name of the boto3 bucket for alert schemas",
     )
     parser.add_argument("--verbose", action="store_true", help="log a bunch")
     parser.add_argument("--debug", action="store_true", help="log even more")
@@ -85,22 +85,20 @@ def main():
 
         backend = FileBackend(args.local_file_root)
 
-    elif args.backend == "google-cloud":
-        logger.info("using google-cloud backend")
+    elif args.backend == "s3-remote":
+        logger.info("using s3-remote backend")
 
-        if args.gcp_project is None:
-            parser.error("--backend=google-cloud requires --gcp-project be set")
-        logger.info("gcp_project: %s", args.gcp_project)
+        logger.info("endpoint-url: %s", args.endpoint_url)
 
-        if args.gcp_bucket_alerts is None or args.gcp_bucket_schemas is None:
+        if args.bucket_alerts is None or args.bucket_schemas is None:
             parser.error(
-                "--backend=google-cloud requires --gcp-bucket-alerts and --gcp-bucket-schemas be set"
+                "--backend=s3-remote requires --bucket-alerts and --bucket-schemas be set"
             )
-        logger.info("gcp_bucket_alerts: %s", args.gcp_bucket_alerts)
-        logger.info("gcp_bucket_schemas: %s", args.gcp_bucket_schemas)
+        logger.info("bucket_alerts: %s", args.bucket_alerts)
+        logger.info("bucket_schemas: %s", args.bucket_schemas)
 
-        backend = GoogleObjectStorageBackend(
-            args.gcp_project, args.gcp_bucket_alerts, args.gcp_bucket_schemas
+        backend = USDFObjectStorageBackend(
+            args.endpoint_url, args.bucket_alerts, args.bucket_schemas
         )
 
     else:

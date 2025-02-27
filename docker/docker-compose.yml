@@ -1,0 +1,21 @@
+services:
+  minio:
+    image: quay.io/minio/minio
+    command:
+      - server
+      - /data
+      - --console-address
+      - ":9001"
+    environment:
+      MINIO_ROOT_USER: AWSACCESSKEYID
+      MINIO_ROOT_PASSWORD: AWSSECRETACCESSKEY
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:  # pick one and only one of these
+      - minio:/data  # an initially empty Docker volume
+      # - ./data:/data  # the data directory right here
+      # - /path/to/data:/data  # any arbitrary path you like
+
+volumes:
+  minio:
