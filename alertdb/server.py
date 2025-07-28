@@ -44,11 +44,11 @@ def create_server(backend: AlertDatabaseBackend) -> FastAPI:
 
     app = FastAPI()
 
-    @app.get("/v1/health")
+    @app.get("v1/health")
     def healthcheck():
         return Response(content=b"OK")
 
-    @app.get("/v1/schemas/{schema_id}")
+    @app.get("v1/schemas/{schema_id}")
     def get_schema(schema_id: str):
         try:
             schema_bytes = backend.get_schema(schema_id)
@@ -57,7 +57,7 @@ def create_server(backend: AlertDatabaseBackend) -> FastAPI:
 
         return Response(content=schema_bytes, media_type=SCHEMA_CONTENT_TYPE)
 
-    @app.get("/v1/alerts/{alert_id}")
+    @app.get("v1/alerts/{alert_id}")
     def get_alert(alert_id: str):
         try:
             alert_bytes = backend.get_alert(alert_id)
