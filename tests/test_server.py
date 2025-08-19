@@ -15,5 +15,5 @@ def test_server_healthcheck(file_backend):
     """Test that the server responds on the healthcheck endpoint."""
     server = create_server(file_backend)
     client = TestClient(server)
-    response = client.get("v1/health")
+    response = client.get("/v1/health")
     assert response.status_code == 200
