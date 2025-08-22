@@ -143,7 +143,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
         try:
-            alert_key = f"/v1/alerts/{alert_id}.avro"
+            alert_key = f"v1/alerts/{alert_id}.avro"
             # boto3 terminology for objects, objects live in prefixes inside
             # of buckets
             blob = self.object_store_client.get_object(
@@ -156,7 +156,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
     def get_schema(self, schema_id: str) -> bytes:
         logger.info("retrieving schema id=%s", schema_id)
         try:
-            schema_key = f"/v1/schemas/{schema_id}.json"
+            schema_key = f"v1/schemas/{schema_id}.json"
             blob = self.object_store_client.get_object(
                 Bucket=self.schema_bucket, Key=schema_key
             )

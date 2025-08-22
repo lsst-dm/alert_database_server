@@ -73,7 +73,7 @@ class ServerIntegrationTest(unittest.TestCase):
             "3": b"schema-payload-3",
         }
         for schema_id, schema_payload in schemas.items():
-            schema_key = f"/v1/schemas/{schema_id}"
+            schema_key = f"v1/schemas/{schema_id}"
             s3.put_object(
                 Body=schema_payload, Bucket=schema_bucket_name, Key=schema_key
             )
@@ -136,7 +136,7 @@ class ServerIntegrationTest(unittest.TestCase):
             return err.response["Error"]["Code"]
 
     def _get_schema(self, schema_id: str) -> requests.Response:
-        schema_key = f"/v1/schemas/{schema_id}"
+        schema_key = f"v1/schemas/{schema_id}"
         schema_bucket_name = "alertdb-server-integration-test-bucket-schemas"
         try:
             return self.s3.get_object(Bucket=schema_bucket_name, Key=schema_key)
