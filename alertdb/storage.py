@@ -142,8 +142,10 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
 
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
+        alert_id_str = str(alert_id)
+        alert_prefix = alert_id_str[:5]
         try:
-            alert_key = f"v1/alerts/{alert_id}.avro.gz"
+            alert_key = f"v1/alerts/{alert_prefix}/{alert_id_str}.avro.gz"
             # boto3 terminology for objects, objects live in prefixes inside
             # of buckets
             blob = self.object_store_client.get_object(
@@ -153,7 +155,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
         except self.object_store_client.exceptions.NoSuchKey:
             # If .avro.gz file is not found, try .avro
             try:
-                alert_key = f"v1/alerts/{alert_id}.avro"
+                alert_key = f"v1/alerts/{alert_prefix}/{alert_id_str}.avro"
                 blob = self.object_store_client.get_object(
                     Bucket=self.packet_bucket, Key=alert_key
                 )
