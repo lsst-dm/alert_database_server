@@ -145,7 +145,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
         alert_id_str = str(alert_id)
-        alert_prefix = alert_id_str[:5]
+        alert_prefix = alert_id_str[:6]
         try:
             alert_key = f"{VERSION}/alerts/{alert_prefix}/{alert_id_str}.avro.gz"
             # boto3 terminology for objects, objects live in prefixes inside
