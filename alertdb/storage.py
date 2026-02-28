@@ -10,6 +10,8 @@ import boto3
 
 logger = logging.getLogger(__name__)
 
+VERSION = "v2"
+
 
 class AlertDatabaseBackend(abc.ABC):
     """
@@ -142,8 +144,10 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
 
     def get_alert(self, alert_id: str) -> bytes:
         logger.info("retrieving alert id=%s", alert_id)
+        alert_id_str = str(alert_id)
+        alert_prefix = alert_id_str[:6]
         try:
-            alert_key = f"v1/alerts/{alert_id}.avro.gz"
+            alert_key = f"{VERSION}/alerts/{alert_prefix}/{alert_id_str}.avro.gz"
             # boto3 terminology for objects, objects live in prefixes inside
             # of buckets
             blob = self.object_store_client.get_object(
@@ -153,7 +157,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
         except self.object_store_client.exceptions.NoSuchKey:
             # If .avro.gz file is not found, try .avro
             try:
-                alert_key = f"v1/alerts/{alert_id}.avro"
+                alert_key = f"{VERSION}/alerts/{alert_prefix}/{alert_id_str}.avro"
                 blob = self.object_store_client.get_object(
                     Bucket=self.packet_bucket, Key=alert_key
                 )
@@ -164,7 +168,7 @@ class USDFObjectStorageBackend(AlertDatabaseBackend):
     def get_schema(self, schema_id: str) -> bytes:
         logger.info("retrieving schema id=%s", schema_id)
         try:
-            schema_key = f"v1/schemas/{schema_id}.json"
+            schema_key = f"{VERSION}/schemas/{schema_id}.json"
             blob = self.object_store_client.get_object(
                 Bucket=self.schema_bucket, Key=schema_key
             )

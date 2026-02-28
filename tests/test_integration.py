@@ -12,6 +12,8 @@ from alertdb.storage import USDFObjectStorageBackend
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
 
+VERSION = "v2"
+
 
 class ServerIntegrationTest(unittest.TestCase):
     @classmethod
@@ -62,7 +64,7 @@ class ServerIntegrationTest(unittest.TestCase):
             "alert-id-3": b"payload-3",
         }
         for alert_id, alert_payload in alerts.items():
-            alert_key = f"v1/alerts/{alert_id}.avro"
+            alert_key = f"{VERSION}/alerts/{alert_id}.avro"
             s3.put_object(Body=alert_payload, Bucket=packet_bucket_name, Key=alert_key)
             logger.info("uploading alert %s", alert_id)
             cls.addClassCleanup(delete_blob, alert_key, packet_bucket_name)
@@ -73,7 +75,7 @@ class ServerIntegrationTest(unittest.TestCase):
             "3": b"schema-payload-3",
         }
         for schema_id, schema_payload in schemas.items():
-            schema_key = f"v1/schemas/{schema_id}"
+            schema_key = f"{VERSION}/schemas/{schema_id}"
             s3.put_object(
                 Body=schema_payload, Bucket=schema_bucket_name, Key=schema_key
             )
@@ -128,7 +130,7 @@ class ServerIntegrationTest(unittest.TestCase):
         self.assertEqual(response["ResponseMetadata"]["HTTPStatusCode"], 200)
 
     def _get_alert(self, alert_id: str) -> requests.Response:
-        alert_key = f"v1/alerts/{alert_id}.avro"
+        alert_key = f"{VERSION}/alerts/{alert_id}.avro"
         alert_bucket = "alertdb-server-integration-test-bucket-packets"
         try:
             return self.s3.gOet_object(Bucket=alert_bucket, Key=alert_key)
@@ -136,7 +138,7 @@ class ServerIntegrationTest(unittest.TestCase):
             return err.response["Error"]["Code"]
 
     def _get_schema(self, schema_id: str) -> requests.Response:
-        schema_key = f"v1/schemas/{schema_id}"
+        schema_key = f"{VERSION}/schemas/{schema_id}"
         schema_bucket_name = "alertdb-server-integration-test-bucket-schemas"
         try:
             return self.s3.get_object(Bucket=schema_bucket_name, Key=schema_key)
